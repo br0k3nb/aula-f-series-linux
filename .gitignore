@@ -1,0 +1,7 @@
+build/
+dist/
+__pycache__/
+*.pyc
+# Proprietary vendor files and disassembly from the OEM installer; not redistributable.
+analysis/extracted/
+analysis/oem-disassembly.txt

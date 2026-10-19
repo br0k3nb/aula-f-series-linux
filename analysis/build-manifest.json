@@ -1,0 +1,10 @@
+{
+  "build/aula-control": {
+    "sha256": "9453a30acd02f8b2040eec76c570bc07eb787d77476f2db1112c524d20ea2449",
+    "bytes": 1175208
+  },
+  "dist/aula-control-linux-x86_64.tar.gz": {
+    "sha256": "916599136ad43f4e289b620da15889e3a32c521859c1957b698583d1eeaa6b47",
+    "bytes": 485969
+  }
+}
