@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
+#define _GNU_SOURCE
 #include "hid_linux.h"
 #include "protocol.h"
 #include "lighting_ext.h"
@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 static const char *modes[] = {"Off", "Fixed", "Breathing", "Rainbow", "Flash away",
@@ -120,6 +121,15 @@ int main(int argc,char **argv) {
  if(argc==1 || (argc==2 && !strcmp(argv[1],"--gui"))) {
   char exe[PATH_MAX]; ssize_t n=readlink("/proc/self/exe",exe,sizeof(exe)-1);
   if(n<0) {perror("readlink"); return 1;} exe[n]=0;
+  /* A single exec argument is limited to 128 KiB, which the interface source
+     exceeds, so hand it to Python through an in-memory file instead of -c. */
+  int fd=memfd_create("aula-studio.py",0);
+  size_t left=strlen(aula_gui_source); const char *at=aula_gui_source;
+  while(fd>=0 && left) {ssize_t w=write(fd,at,left); if(w<=0) {close(fd); fd=-1;} else {at+=w; left-=(size_t)w;}}
+  if(fd>=0) {
+   char script[64]; snprintf(script,sizeof(script),"/proc/self/fd/%d",fd);
+   execl("/usr/bin/python3","python3",script,exe,(char *)NULL);
+  }
   execl("/usr/bin/python3","python3","-c",aula_gui_source,exe,(char *)NULL);
   perror("Unable to start desktop UI with /usr/bin/python3 (PyGObject/GTK3 required)");
   return 1;
